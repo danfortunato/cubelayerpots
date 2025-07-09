@@ -1,0 +1,14 @@
+# macOS files
+.DS_Store
+
+# Fortran files
+fort.*
+*.o
+*.mod
+*.a
+*.so
+*.out
+
+# MATLAB files
+*.asv
+*.m~
