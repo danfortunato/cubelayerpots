@@ -1,5 +1,6 @@
+function test_greens_identity
 %
-%     test Green's identity on constant density on cube:
+%     Test Green's identity on constant density on cube:
 %     4 squares with 5x5 grids on each face.
 %
 %
@@ -77,3 +78,5 @@ err = sum((0.5*uu(:) - ucomp(:)).^2);
 fprintf('L2 error = %g\n', sqrt(err));
  
 toc
+
+end

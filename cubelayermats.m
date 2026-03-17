@@ -211,12 +211,14 @@ rr = sqrt(rr2);
 boxsize = 1/nside;
 rlamuse = rlam*boxsize/2;
 
-kern = exp(-rlamuse*rr)./(4*pi*rr);
+exp_r = exp(-rlamuse*rr);
+
+kern = exp_r./(4*pi*rr);
 kern = reshape(kern, [nq^2 ncheb^2 nsq_per_face nsq_per_face]);
 f = tensorprod(txyw, kern, 1, 1);
 tabslp = permute(f, [2 1 3 4]);
 
-kern = dr.*(1./rr+rlamuse).*exp(-rlamuse*rr)./(4*pi*rr2);
+kern = dr.*(1./rr+rlamuse).*exp_r./(4*pi*rr2);
 kern = reshape(kern, [nq^2 ncheb^2 nsq_per_face nsq_per_face]);
 f = tensorprod(txyw, kern, 1, 1);
 tabdlp = permute(f, [2 1 3 4]);
