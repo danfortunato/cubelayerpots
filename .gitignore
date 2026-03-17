@@ -12,3 +12,4 @@ fort.*
 # MATLAB files
 *.asv
 *.m~
+*.mex*

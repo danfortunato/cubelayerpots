@@ -3,10 +3,10 @@ function [xx, yy, zz] = cubepts(ncheb, nside)
 %             ____
 %            /| 6 /|      6 = top                  y
 %           /_|_ / |      5 = bottom           z| /
-%         1|  |_ |_|2     4 = (y=1 face)        |/___ x
-%          | /   | /      3 = (y=-1 face)
-%          |/__5_|/       2 = (x=1 face)
-%                         1 = (x=-1 face)
+%         1|  |_ |_|2     4 = (y= 1/2 face)     |/___ x
+%          | /   | /      3 = (y=-1/2 face)
+%          |/__5_|/       2 = (x= 1/2 face)
+%                         1 = (x=-1/2 face)
 %     for 6: x=fast,y=slow
 %          centers (-hh,-hh,-1),(hh,-hh,-1),(-hh,hh,-1),(hh,hh,-1),
 %           e1 = (1,0,0),e2 = (0,1,0),e3 = (0,0,1),

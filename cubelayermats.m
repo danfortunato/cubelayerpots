@@ -1,15 +1,15 @@
-function [slpmat, dlpmat] = cubelayermats(ncheb, nside, nq)
+function [slpmat, dlpmat] = cubelayermats(rlam, ncheb, nside, nq)
 
 ibflag = mkibflag(nside);
 
-slpside = load('tab/slpside.mat', 'w').('w');
-slpsame = load('tab/slpsame.mat', 'w').('w');
-dlpside = load('tab/dlpside.mat', 'w').('w');
-
-if ( size(slpside, 1) ~= ncheb^2 || ...
-     size(slpsame, 1) ~= ncheb^2 || ...
-     size(dlpside, 1) ~= ncheb^2 )
-    error('No precomputed tables found for ncheb=%d.', ncheb);
+boxsize = 1/nside;
+rlamuse = rlam*boxsize/2;
+tab_file = sprintf('tab/tab_rlam=%.16g_ncheb=%d.mat', rlamuse, ncheb);
+if isfile(tab_file)
+    load(tab_file, 'slpsame', 'slpside', 'dlpside');
+else
+    [slpsame, slpside, dlpside] = gentab(rlamuse, ncheb);
+    save(tab_file, 'slpsame', 'slpside', 'dlpside');
 end
 
 nsq_per_face = nside^2;
@@ -34,7 +34,7 @@ txyw = reshape(txyw, [nq^2 ncheb^2]);
 
 for ifacet = 1:6
     for ifaces = 1:6
-        [slpfar, dlpfar] = genlpfar(ifaces, ifacet, nside, xcheb, xq, txyw);
+        [slpfar, dlpfar] = genlpfar(rlam, ifaces, ifacet, nside, xcheb, xq, txyw);
         for jsq = 1:nsq_per_face
             for jtq = 1:nsq_per_face
                 ifl = ibflag(jtq, jsq, ifacet, ifaces);
@@ -56,15 +56,17 @@ boxsize = 1/nside;
 slpmat = slpmat * boxsize/2;
 
 % Now de-interleave target and source data and reshape into matrices
-% ndof = ncheb^2 * nsq_per_face * 6;
-% slpmat = permute(slpmat, [1 3 5 2 4 6]);
-% slpmat = reshape(slpmat, ndof, ndof);
-% dlpmat = permute(dlpmat, [1 3 5 2 4 6]);
-% dlpmat = reshape(dlpmat, ndof, ndof);
+ndof = ncheb^2 * nsq_per_face * 6;
+slpmat = permute(slpmat, [1 3 5 2 4 6]);
+slpmat = reshape(slpmat, ndof, ndof);
+dlpmat = permute(dlpmat, [1 3 5 2 4 6]);
+dlpmat = reshape(dlpmat, ndof, ndof);
+
+% reshape(slpmat, [ncheb^2 nsq_per_face 6 ncheb^2 nsq_per_face 6]);
 
 end
 
-function [tabslp, tabdlp] = genlpfar(ifaces, ifacet, nside, xcheb, xq, txyw)
+function [tabslp, tabdlp] = genlpfar(rlam, ifaces, ifacet, nside, xcheb, xq, txyw)
 %
 %     generates SLP, DLP far field NxN interaction matrix for all sources
 %     on the IFACES side of the unit cube and all targets on the IFACET
@@ -203,14 +205,18 @@ switch ifaces
         dr = rz;
 end
 
-rr = sqrt(rx.^2 + ry.^2 + rz.^2);
+rr2 = rx.^2 + ry.^2 + rz.^2;
+rr = sqrt(rr2);
 
-kern = 1./(4*pi*rr);
+boxsize = 1/nside;
+rlamuse = rlam*boxsize/2;
+
+kern = exp(-rlamuse*rr)./(4*pi*rr);
 kern = reshape(kern, [nq^2 ncheb^2 nsq_per_face nsq_per_face]);
 f = tensorprod(txyw, kern, 1, 1);
 tabslp = permute(f, [2 1 3 4]);
 
-kern = dr./(4*pi*rr.^3);
+kern = dr.*(1./rr+rlamuse).*exp(-rlamuse*rr)./(4*pi*rr2);
 kern = reshape(kern, [nq^2 ncheb^2 nsq_per_face nsq_per_face]);
 f = tensorprod(txyw, kern, 1, 1);
 tabdlp = permute(f, [2 1 3 4]);
