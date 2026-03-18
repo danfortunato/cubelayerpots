@@ -50,21 +50,18 @@ root.split(level);
 root.update_idx(1);
 tstart = tic;
 root.build(pdo, f);
+DtN_int = full(root.D2N);
+neu_part = DtN_int(:,end);
+DtN_int = DtN_int(:,1:end-1);
 t = toc(tstart);
 
 fprintf('Problem size: %d\n', ((2^level)*order + 1)^dim);
 fprintf('Total time to build: %gs\n', t);
 
-%%
-DtN_int = full(root.D2N);
-
-neu_part = DtN_int(:,end);
-DtN_int = DtN_int(:,1:end-1);
-
 I = eye(size(S));
 A = I/2 - D + S*DtN_int;
 
-rhs = S * neu_part;
+rhs = S * (-neu_part);
 dir_tot = A \ rhs;
 
 % Evaluate the computed solution at a target
@@ -74,8 +71,8 @@ zt = -0.5;
 
 % Evaluate on the interior using Hari's code:
 tstart = tic;
-u = root.solve(dir_tot);
-utarg = root.solve_at(dir_tot, [xt yt zt]);
+u = -root.solve(dir_tot);
+utarg = -root.solve_at(dir_tot, [xt yt zt]);
 t = toc(tstart);
 fprintf('Total time to solve: %g\n', t);
 
@@ -101,7 +98,7 @@ subplot(131)
 root.slice(u, 'x', 0.2);
 title('HPS solution')
 
-subplot(132)
+subplot(132);
 root.slice(usol, 'x', 0.2);
 title('Exact solution')
 
